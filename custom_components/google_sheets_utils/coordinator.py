@@ -14,6 +14,8 @@ from homeassistant.const import CONF_ACCESS_TOKEN, CONF_TOKEN
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .const import REFRESH_TOKEN
+
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
@@ -52,7 +54,12 @@ async def async_fetch_cell_value(
     """Fetch a cell value from Google Sheets in a thread-safe way."""
 
     def _fetch() -> GSheetsCellValue:
-        client = Client(Credentials(config_entry.data[CONF_TOKEN][CONF_ACCESS_TOKEN]))  # type: ignore[no-untyped-call]
+        client = Client(
+            Credentials(
+                config_entry.data[CONF_TOKEN][CONF_ACCESS_TOKEN],
+                config_entry.data[CONF_TOKEN][REFRESH_TOKEN],
+            )
+        )  # type: ignore[no-untyped-call]
         sheet = client.open_by_key(spreadsheet_id)
         worksheet = sheet.worksheet(worksheet_name)
         rows = worksheet.get_values(cell)

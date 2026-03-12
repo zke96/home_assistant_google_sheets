@@ -9,3 +9,5 @@ ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
 
 DEFAULT_NAME = "Google Sheets"
 DEFAULT_ACCESS = "https://www.googleapis.com/auth/drive"
+
+REFRESH_TOKEN = "refresh_token"  # noqa: S105
