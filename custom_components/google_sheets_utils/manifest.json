@@ -5,15 +5,15 @@
     "@zke96"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/zke96/home_assistant_google_sheets/blob/main/README.md",
-  "issue_tracker": "https://github.com/zke96/home_assistant_google_sheets/issues",
-  "integration_type": "hub",
-  "iot_class": "cloud_polling",
-  "version": "0.1.0",
   "dependencies": [
     "application_credentials"
   ],
+  "documentation": "https://github.com/zke96/home_assistant_google_sheets/blob/main/README.md",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/zke96/home_assistant_google_sheets/issues",
   "requirements": [
     "gspread==5.5.0"
-  ]
+  ],
+  "version": "0.1.0"
 }

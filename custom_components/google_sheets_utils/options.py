@@ -2,6 +2,10 @@
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigFlowResult, OptionsFlow
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import selector
+
+from .const import DOMAIN
 
 
 class GoogleSheetsOptionsFlowHandler(OptionsFlow):
@@ -11,36 +15,62 @@ class GoogleSheetsOptionsFlowHandler(OptionsFlow):
         """
         Handle the initial step of the options flow for Google Sheets integration.
 
-        Parameters
-        ----------
-        user_input : dict or None, optional
-            The user input from the options form, by default None.
+        Args:
+            user_input (dict | None): User input from the options form.
 
-        Returns
-        -------
-        object
-            The result of the options flow step, either showing the form or creating an entry.
+        Returns:
+            ConfigFlowResult: Result of the options flow step.
 
-        """  # noqa: E501
+        """
+
+        def _remove(registry: er.EntityRegistry, cell: str) -> None:
+            """Remove an entity from the registry."""
+            entity_id = registry.async_get_entity_id("sensor", DOMAIN, cell)
+            if entity_id:
+                registry.async_remove(entity_id)
+
         cellscopy = self.config_entry.options.get("cells", []).copy()
         if user_input is not None:
-            # Add the new cell config
-            cellscopy.append(
-                {
-                    "spreadsheet_id": user_input["spreadsheet_id"],
-                    "worksheet": user_input.get("worksheet", "Sheet1"),
-                    "cell": user_input["cell"],
-                }
-            )
+            # Remove selected cell configs
+            to_remove = user_input.get("remove", None)
+            cellscopy = [c for c in cellscopy if c != to_remove]
+            if to_remove:
+                registry = er.async_get(self.hass)
+                _remove(registry, to_remove)
+
+            # Add new cell config if provided
+            if user_input.get("spreadsheet_id") and user_input.get("cell"):
+                cellscopy.append(
+                    {
+                        "spreadsheet_id": user_input["spreadsheet_id"],
+                        "worksheet": user_input.get("worksheet", "Sheet1"),
+                        "cell": user_input["cell"],
+                    }
+                )
             return self.async_create_entry(title="", data={"cells": cellscopy})
+
+        # Build choices for removal
+        remove_choices = [
+            selector.SelectOptionDict(
+                label=f"{c['spreadsheet_id']} {c['worksheet']} {c['cell']}",
+                value=f"gsheets_{c['spreadsheet_id']}_{c['worksheet']}_{c['cell']}",
+            )
+            for i, c in enumerate(cellscopy)
+        ]
 
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Required("spreadsheet_id"): str,
-                    vol.Required("worksheet", default="Sheet1"): str,
-                    vol.Required("cell"): str,
+                    vol.Optional("remove"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=remove_choices,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    ),
+                    vol.Optional("spreadsheet_id"): str,
+                    vol.Optional("worksheet", default="Sheet1"): str,
+                    vol.Optional("cell"): str,
                 }
             ),
             description_placeholders={},

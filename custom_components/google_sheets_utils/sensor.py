@@ -63,7 +63,9 @@ class GoogleSheetsCellSensor(CoordinatorEntity, SensorEntity):
         self.worksheet = config["worksheet"]
         self.cell = config["cell"]
         self._attr_name = f"Google Sheets {self.spreadsheet_id} {self.cell}"
-        self._attr_unique_id = f"gsheets_{self.spreadsheet_id}_{self.cell}"
+        self._attr_unique_id = (
+            f"gsheets_{self.spreadsheet_id}_{self.worksheet}_{self.cell}"
+        )
         self._attr_icon = "mdi:google-spreadsheet"
 
     @property
@@ -71,4 +73,7 @@ class GoogleSheetsCellSensor(CoordinatorEntity, SensorEntity):
         """Return the current cell value."""
         key = f"{self.spreadsheet_id}_{self.worksheet}_{self.cell}"
         value = self.coordinator.data.get(key) if self.coordinator.data else None
-        return value if value is not None else "N/A"
+        if value:
+            self._attr_name = f"Google Sheets: {value.spreadsheet_name}-{value.worksheet_name}-{value.cell}"  # noqa: E501
+            return value.cell_value
+        return "N/A"

@@ -77,9 +77,11 @@ def async_entry_has_scopes(
     ).split(" ")
 
 
-async def async_unload_entry(_: HomeAssistant, _1: GoogleSheetsConfigEntry) -> bool:
+async def async_unload_entry(
+    hass: HomeAssistant, config_entry: GoogleSheetsConfigEntry
+) -> bool:
     """Unload a config entry."""
-    return True
+    return await hass.config_entries.async_unload_platforms(config_entry, ["sensor"])
 
 
 async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry) -> None:

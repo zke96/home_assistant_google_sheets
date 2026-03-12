@@ -24,16 +24,34 @@ _LOGGER = logging.getLogger(__name__)
 UPDATE_INTERVAL = timedelta(minutes=5)
 
 
+class GSheetsCellValue:
+    """Stores all cell values."""
+
+    def __init__(  # noqa: D107
+        self,
+        spreadsheet_name: str,
+        spreadsheet_id: str,
+        worksheet_name: str,
+        cell: str,
+        cell_value: str,
+    ) -> None:
+        self.spreadsheet_name = spreadsheet_name
+        self.spreadsheet_id = spreadsheet_id
+        self.worksheet_name = worksheet_name
+        self.cell = cell
+        self.cell_value = cell_value
+
+
 async def async_fetch_cell_value(
     hass: HomeAssistant,
     config_entry: GoogleSheetsConfigEntry,
     spreadsheet_id: str,
     worksheet_name: str,
     cell: str,
-) -> str:
+) -> GSheetsCellValue:
     """Fetch a cell value from Google Sheets in a thread-safe way."""
 
-    def _fetch() -> str:
+    def _fetch() -> GSheetsCellValue:
         client = Client(Credentials(config_entry.data[CONF_TOKEN][CONF_ACCESS_TOKEN]))  # type: ignore[no-untyped-call]
         sheet = client.open_by_key(spreadsheet_id)
         worksheet = sheet.worksheet(worksheet_name)
@@ -41,7 +59,13 @@ async def async_fetch_cell_value(
         if not rows or not rows[0]:
             msg = f"No value found in cell {cell} of worksheet {worksheet_name}"
             raise HomeAssistantError(msg)
-        return worksheet.get_values(cell)[0][0]
+        return GSheetsCellValue(
+            spreadsheet_name=sheet.title,
+            spreadsheet_id=spreadsheet_id,
+            worksheet_name=worksheet_name,
+            cell=cell,
+            cell_value=rows[0][0],
+        )
 
     try:
         return await hass.async_add_executor_job(_fetch)
@@ -56,7 +80,9 @@ async def async_fetch_cell_value(
         raise HomeAssistantError(msg) from ex
 
 
-class GoogleSheetsDataUpdateCoordinator(DataUpdateCoordinator):
+class GoogleSheetsDataUpdateCoordinator(
+    DataUpdateCoordinator[dict[str, GSheetsCellValue]]
+):
     """Coordinator to fetch and update cell values from Google Sheets for Home Assistant integration."""  # noqa: E501
 
     def __init__(
