@@ -1,14 +1,5 @@
 {
     "config": {
-        "step": {
-            "user": {
-                "description": "If you need help with the configuration have a look here: https://github.com/zke96/home_assistant_google_sheets/",
-                "data": {
-                    "username": "Username",
-                    "password": "Password"
-                }
-            }
-        },
         "error": {
             "auth": "Username/Password is wrong.",
             "connection": "Unable to connect to the server.",

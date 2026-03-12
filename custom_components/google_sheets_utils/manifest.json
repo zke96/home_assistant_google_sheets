@@ -6,6 +6,8 @@
   ],
   "config_flow": true,
   "documentation": "https://github.com/zke96/home_assistant_google_sheets/blob/main/README.md",
+  "issue_tracker": "https://github.com/zke96/home_assistant_google_sheets/issues",
+  "integration_type": "hub",
   "iot_class": "cloud_polling",
   "version": "0.1.0",
   "dependencies": [
@@ -13,8 +15,5 @@
   ],
   "requirements": [
     "gspread==5.5.0"
-  ],
-  "platforms": [
-    "sensor"
   ]
 }
