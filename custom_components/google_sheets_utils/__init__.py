@@ -53,14 +53,13 @@ async def async_setup_entry(
         msg = "Required scopes are not present, reauth required"
         raise ConfigEntryAuthFailed(msg)
 
-    await coordinator.async_config_entry_first_refresh()
-
     entry.runtime_data = GoogleSheetsIntegrationData(
         integration=async_get_loaded_integration(hass, entry.domain),
         coordinator=coordinator,
         session=session,
     )
 
+    await coordinator.async_config_entry_first_refresh()
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     entry.async_on_unload(entry.add_update_listener(update_listener))

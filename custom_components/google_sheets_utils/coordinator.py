@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
-UPDATE_INTERVAL = timedelta(minutes=5)
+UPDATE_INTERVAL = timedelta(minutes=1)
 
 
 class GSheetsCellValue:
@@ -114,6 +114,7 @@ class GoogleSheetsDataUpdateCoordinator(
         )
 
     async def _async_update_data(self) -> dict[str, Any]:
+        await self.config_entry.runtime_data.session.async_ensure_token_valid()
         results = {}
         for config in self.cell_configs:
             spreadsheet_id = config["spreadsheet_id"]
